@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Envío WhatsApp</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root{
+  --bg1:#0b1220; --bg2:#13213b; --card:rgba(255,255,255,.07); --line:rgba(255,255,255,.14);
+  --text:#eef3ff; --muted:#a9b6d3; --green:#25d366; --green2:#128c7e; --pink:#ff4fa3; --violet:#7c5cff;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Poppins,system-ui,sans-serif;color:var(--text);min-height:100vh;
+  background:radial-gradient(circle at 15% 10%,rgba(124,92,255,.45),transparent 40%),
+             radial-gradient(circle at 85% 20%,rgba(255,79,163,.35),transparent 40%),
+             radial-gradient(circle at 50% 100%,rgba(37,211,102,.30),transparent 45%),
+             linear-gradient(160deg,var(--bg1),var(--bg2));background-attachment:fixed}
+.wrap{max-width:980px;margin:0 auto;padding:32px 16px 60px}
+header{text-align:center;margin-bottom:28px}
+.logo{width:72px;height:72px;margin:0 auto 12px;border-radius:22px;display:grid;place-items:center;
+  background:linear-gradient(135deg,var(--green),var(--green2));box-shadow:0 10px 40px rgba(37,211,102,.5);
+  animation:float 3s ease-in-out infinite}
+@keyframes float{50%{transform:translateY(-8px)}}
+h1{font-size:clamp(28px,6vw,46px);margin:0;font-weight:800;
+  background:linear-gradient(90deg,#fff,var(--green),var(--pink));-webkit-background-clip:text;background-clip:text;color:transparent}
+header p{color:var(--muted);margin:8px 0 0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:22px;margin-bottom:18px;
+  backdrop-filter:blur(14px);box-shadow:0 10px 40px rgba(0,0,0,.25)}
+.card h2{margin:0 0 14px;font-size:18px;display:flex;align-items:center;gap:10px}
+.num{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-size:14px;
+  background:linear-gradient(135deg,var(--violet),var(--pink))}
+.drop{border:2px dashed var(--line);border-radius:18px;padding:30px 16px;text-align:center;cursor:pointer;transition:.2s}
+.drop:hover,.drop.over{border-color:var(--green);background:rgba(37,211,102,.08)}
+.drop b{color:var(--green)}
+.small{color:var(--muted);font-size:13px}
+.row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+input[type=text],textarea{width:100%;background:rgba(0,0,0,.25);color:var(--text);border:1px solid var(--line);
+  border-radius:14px;padding:12px 14px;font:inherit;outline:none}
+textarea{min-height:110px;resize:vertical}
+input:focus,textarea:focus{border-color:var(--green)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.chip{background:rgba(124,92,255,.25);border:1px solid rgba(124,92,255,.5);padding:4px 12px;border-radius:999px;
+  font-size:13px;cursor:pointer}
+.btn{border:0;border-radius:14px;padding:12px 18px;font:600 15px Poppins,sans-serif;color:#fff;cursor:pointer;
+  background:linear-gradient(135deg,var(--green),var(--green2));box-shadow:0 6px 20px rgba(37,211,102,.35);transition:.15s}
+.btn:hover{transform:translateY(-2px)}
+.btn.alt{background:rgba(255,255,255,.1);box-shadow:none;border:1px solid var(--line)}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+.stat{background:rgba(0,0,0,.25);border-radius:16px;padding:12px;text-align:center}
+.stat b{display:block;font-size:24px}
+.bar{height:10px;background:rgba(0,0,0,.3);border-radius:99px;overflow:hidden;margin-bottom:16px}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--green),var(--pink));transition:.4s}
+.list{display:grid;gap:10px}
+.item{display:flex;gap:12px;align-items:center;background:rgba(0,0,0,.22);border:1px solid var(--line);
+  border-radius:16px;padding:12px 14px;transition:.2s}
+.item.sent{opacity:.55;border-color:rgba(37,211,102,.6)}
+.avatar{flex:none;width:42px;height:42px;border-radius:50%;display:grid;place-items:center;font-weight:800;
+  background:linear-gradient(135deg,var(--violet),var(--pink))}
+.item.sent .avatar{background:var(--green)}
+.info{flex:1;min-width:0}
+.info strong{display:block}
+.info span{display:block;color:var(--muted);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bad{color:#ff8a8a!important}
+.hidden{display:none}
+footer{text-align:center;color:var(--muted);font-size:13px;margin-top:30px}
+@media (max-width:560px){.item{flex-wrap:wrap}.item .btn{width:100%}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="#fff"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.1l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.7.8-.8 1-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.3-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.5 4c1.7.7 2.3.8 3.2.6a2.7 2.7 0 0 0 1.8-1.2 2.2 2.2 0 0 0 .2-1.2c-.1-.1-.3-.2-.5-.3z"/></svg>
+    </div>
+    <h1>Mensajes por WhatsApp</h1>
+    <p>Cargá tu hoja, escribí tu mensaje y enviá a cada contacto con un clic.</p>
+  </header>
+
+  <section class="card">
+    <h2><span class="num">1</span> Cargá tu hoja</h2>
+    <label class="drop" id="drop">
+      <input type="file" id="file" accept=".xlsx,.xls,.csv" hidden>
+      <div style="font-size:34px">📄</div>
+      <div><b>Tocá aquí</b> o arrastrá tu archivo Excel o CSV</div>
+      <div class="small" id="fileName">Necesita una columna con el teléfono (y si querés, nombre y mensaje)</div>
+    </label>
+    <div class="row" style="margin-top:14px">
+      <button class="btn alt" id="sample">⬇️ Descargar plantilla</button>
+      <span class="small">Código de país:</span>
+      <input type="text" id="cc" value="502" style="width:90px">
+    </div>
+  </section>
+
+  <section class="card hidden" id="step2">
+    <h2><span class="num">2</span> Escribí tu mensaje</h2>
+    <textarea id="tpl">🎉 ¡Muchas felicidades, {nombre}! 🎉 Te deseo lo mejor en este día tan especial. ¡Que todos tus sueños se cumplan! 🥳🎂</textarea>
+    <div class="small" style="margin-top:8px">Tocá una etiqueta para insertar el dato de cada fila:</div>
+    <div class="chips" id="chips"></div>
+    <div class="small" id="msgNote" style="margin-top:10px"></div>
+  </section>
+
+  <section class="card hidden" id="step3">
+    <h2><span class="num">3</span> Enviá</h2>
+    <div class="stats">
+      <div class="stat"><b id="sTotal">0</b><span class="small">Contactos</span></div>
+      <div class="stat"><b id="sSent">0</b><span class="small">Enviados</span></div>
+      <div class="stat"><b id="sLeft">0</b><span class="small">Pendientes</span></div>
+    </div>
+    <div class="bar"><i id="barFill"></i></div>
+    <div class="row" style="margin-bottom:14px">
+      <button class="btn" id="next">🚀 Enviar al siguiente</button>
+      <button class="btn alt" id="reset">↺ Reiniciar marcas</button>
+    </div>
+    <div class="list" id="list"></div>
+  </section>
+
+  <footer>Los datos se quedan en tu navegador; no se suben a ningún servidor.</footer>
+</div>
+
+<script>
+let rows = [], cols = [], phoneCol = null, nameCol = null, msgCol = null, sent = new Set();
+const $ = id => document.getElementById(id);
+
+function load(key, def){ try { return JSON.parse(localStorage.getItem(key)) ?? def; } catch(e){ return def; } }
+function save(key, val){ try { localStorage.setItem(key, JSON.stringify(val)); } catch(e){} }
+
+$('tpl').value = load('tpl', $('tpl').value);
+$('cc').value = load('cc', $('cc').value);
+
+const drop = $('drop');
+['dragover','dragenter'].forEach(e => drop.addEventListener(e, ev => { ev.preventDefault(); drop.classList.add('over'); }));
+['dragleave','drop'].forEach(e => drop.addEventListener(e, ev => { ev.preventDefault(); drop.classList.remove('over'); }));
+drop.addEventListener('drop', ev => ev.dataTransfer.files[0] && readFile(ev.dataTransfer.files[0]));
+$('file').addEventListener('change', ev => ev.target.files[0] && readFile(ev.target.files[0]));
+
+function readFile(f){
+  const r = new FileReader();
+  r.onload = e => {
+    const wb = XLSX.read(new Uint8Array(e.target.result), {type:'array'});
+    const ws = wb.Sheets[wb.SheetNames[0]];
+    rows = XLSX.utils.sheet_to_json(ws, {defval:'', raw:false});
+    if (!rows.length) { alert('La hoja está vacía.'); return; }
+    cols = Object.keys(rows[0]);
+    const find = re => cols.find(c => re.test(c)) || null;
+    phoneCol = find(/tel|cel|phone|whats|n[uú]mero|movil|móvil/i);
+    nameCol  = find(/nombre|name|cliente/i);
+    msgCol   = find(/mensaje|message|texto/i);
+    if (!phoneCol) { alert('No encontré una columna de teléfono. Ponele de título "telefono".'); return; }
+    $('fileName').textContent = `✅ ${f.name} — ${rows.length} contactos`;
+    sent = new Set(load('sent:' + f.name, []));
+    window.fileKey = 'sent:' + f.name;
+    buildChips(); render();
+    $('step2').classList.remove('hidden'); $('step3').classList.remove('hidden');
+  };
+  r.readAsArrayBuffer(f);
+}
+
+function buildChips(){
+  $('chips').innerHTML = '';
+  cols.forEach(c => {
+    const s = document.createElement('span');
+    s.className = 'chip'; s.textContent = '{' + c + '}';
+    s.onclick = () => {
+      const t = $('tpl'), p = t.selectionStart;
+      t.value = t.value.slice(0,p) + '{' + c + '}' + t.value.slice(t.selectionEnd);
+      t.focus(); save('tpl', t.value); render();
+    };
+    $('chips').appendChild(s);
+  });
+  $('msgNote').textContent = msgCol
+    ? `💡 Tu hoja tiene la columna "${msgCol}": las filas que la tengan llena usarán ese mensaje en lugar de este.`
+    : '';
+}
+
+function phone(row){
+  let p = String(row[phoneCol]).replace(/\D/g,'');
+  const cc = $('cc').value.replace(/\D/g,'');
+  if (p && cc && !p.startsWith(cc)) p = cc + p;
+  return p.length >= 8 ? p : '';
+}
+function message(row){
+  const base = (msgCol && String(row[msgCol]).trim()) || $('tpl').value;
+  return base.replace(/\{([^}]+)\}/g, (m, k) => k in row ? row[k] : m);
+}
+function link(row){ return 'https://wa.me/' + phone(row) + '?text=' + encodeURIComponent(message(row)); }
+
+function send(i){
+  window.open(link(rows[i]), '_blank');
+  sent.add(i); save(window.fileKey, [...sent]); render();
+}
+
+function render(){
+  const list = $('list'); list.innerHTML = '';
+  rows.forEach((row, i) => {
+    const p = phone(row), name = nameCol ? row[nameCol] : ('Contacto ' + (i+1));
+    const el = document.createElement('div');
+    el.className = 'item' + (sent.has(i) ? ' sent' : '');
+    el.innerHTML = `<div class="avatar">${sent.has(i) ? '✓' : (String(name).trim()[0] || '?').toUpperCase()}</div>
+      <div class="info"><strong></strong><span class="${p ? '' : 'bad'}"></span></div>`;
+    el.querySelector('strong').textContent = name;
+    el.querySelector('span').textContent = p ? ('+' + p + ' · ' + message(row)) : 'Teléfono inválido';
+    const b = document.createElement('button');
+    b.className = 'btn'; b.textContent = sent.has(i) ? 'Reenviar' : 'Enviar';
+    b.disabled = !p; b.onclick = () => send(i);
+    el.appendChild(b); list.appendChild(el);
+  });
+  const valid = rows.filter(r => phone(r)).length, s = sent.size;
+  $('sTotal').textContent = rows.length; $('sSent').textContent = s; $('sLeft').textContent = Math.max(valid - s, 0);
+  $('barFill').style.width = (valid ? s / valid * 100 : 0) + '%';
+  $('next').disabled = !rows.some((r,i) => phone(r) && !sent.has(i));
+}
+
+$('tpl').addEventListener('input', () => { save('tpl', $('tpl').value); render(); });
+$('cc').addEventListener('input', () => { save('cc', $('cc').value); render(); });
+$('next').onclick = () => { const i = rows.findIndex((r,i) => phone(r) && !sent.has(i)); if (i > -1) send(i); };
+$('reset').onclick = () => { if (confirm('¿Borrar las marcas de enviado?')) { sent.clear(); save(window.fileKey, []); render(); } };
+
+$('sample').onclick = () => {
+  const csv = 'nombre,telefono,mensaje\nAna López,55551234,\nCarlos Pérez,44443210,Hola Carlos este es un mensaje personalizado\n';
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob(['\ufeff' + csv], {type:'text/csv'}));
+  a.download = 'plantilla_contactos.csv'; a.click();
+};
+</script>
+</body>
+</html>
