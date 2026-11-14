@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>300 corazones 💖</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg1:#0b1220;--bg2:#13213b;--card:rgba(255,255,255,.07);--line:rgba(255,255,255,.14);
+  --text:#eef3ff;--muted:#a9b6d3;--green:#25d366;--green2:#128c7e;--pink:#ff4fa3;--violet:#7c5cff}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;font-family:Poppins,system-ui,sans-serif;color:var(--text);overflow:hidden;
+  background:radial-gradient(circle at 15% 10%,rgba(124,92,255,.45),transparent 40%),
+             radial-gradient(circle at 85% 20%,rgba(255,79,163,.35),transparent 40%),
+             radial-gradient(circle at 50% 100%,rgba(37,211,102,.30),transparent 45%),
+             linear-gradient(160deg,var(--bg1),var(--bg2));
+  display:grid;place-items:center;padding:16px}
+.card{position:relative;z-index:10;width:100%;max-width:440px;text-align:center;background:var(--card);
+  border:1px solid var(--line);border-radius:28px;padding:36px 24px;backdrop-filter:blur(14px);
+  box-shadow:0 20px 60px rgba(0,0,0,.35);transition:opacity .5s,transform .5s}
+.icon{font-size:72px;display:inline-block;animation:beat 1.2s ease-in-out infinite}
+@keyframes beat{0%,100%{transform:scale(1)}15%{transform:scale(1.2)}30%{transform:scale(1)}45%{transform:scale(1.15)}}
+h1{font-size:clamp(28px,8vw,40px);margin:10px 0 6px;font-weight:800;line-height:1.15;
+  background:linear-gradient(90deg,#fff,var(--pink),var(--violet));-webkit-background-clip:text;background-clip:text;color:transparent}
+p{color:var(--muted);margin:0 0 24px}
+.btn{border:0;border-radius:16px;padding:14px 34px;font:700 18px Poppins,sans-serif;color:#fff;cursor:pointer;
+  background:linear-gradient(135deg,var(--pink),var(--violet));box-shadow:0 8px 26px rgba(255,79,163,.45);transition:transform .15s}
+.btn:hover{transform:scale(1.08)}
+.hidden{display:none}
+.gone{opacity:0;transform:scale(.8);pointer-events:none}
+#counter{position:fixed;top:24px;left:50%;transform:translateX(-50%);z-index:20;
+  background:var(--card);border:1px solid var(--line);backdrop-filter:blur(14px);
+  border-radius:999px;padding:10px 26px;font-weight:800;font-size:28px;white-space:nowrap}
+#counter small{font-size:14px;color:var(--muted);font-weight:600}
+.h{position:fixed;z-index:5;pointer-events:none;animation:pop .45s cubic-bezier(.2,1.6,.4,1) both}
+@keyframes pop{from{transform:scale(0) rotate(-30deg);opacity:0}to{transform:scale(1) rotate(var(--r));opacity:1}}
+.final{animation:aparece .8s ease both}
+.final p{margin-bottom:20px}
+.foto{display:block;width:100%;max-height:50vh;object-fit:cover;border-radius:22px;
+  border:3px solid var(--pink);box-shadow:0 10px 40px rgba(255,79,163,.5);
+  animation:aparece 1s ease .6s both}
+#final{max-height:calc(100vh - 32px);overflow:auto}
+@keyframes aparece{from{opacity:0;transform:scale(.7)}to{opacity:1;transform:scale(1)}}
+</style>
+</head>
+<body>
+<div class="card" id="start">
+  <div class="icon">💌</div>
+  <h1>Tengo algo para ti</h1>
+  <p>Toca el botón 👇</p>
+  <button class="btn" id="open">Ábrelo 💖</button>
+</div>
+
+<div id="counter" class="hidden">💖 <span id="n">0</span> <small>/ 300</small></div>
+
+<div class="card final hidden" id="final">
+  <div class="icon">💖</div>
+  <h1>300 corazones porque uno no alcanza</h1>
+  <p>para todo lo que te quiero, Rosmina 🥰</p>
+  <img class="foto" src="Rosmina.jpeg" alt="Rosmina" onerror="this.style.display='none'">
+</div>
+
+<script>
+const TOTAL = 300, emojis = ['❤️','💖','💕','💗','💓','💘'];
+const $ = id => document.getElementById(id);
+
+function lanzar(){
+  document.querySelectorAll('.h').forEach(h => h.remove());
+  $('final').classList.add('hidden');
+  $('counter').classList.remove('hidden');
+  let i = 0;
+  const t = setInterval(() => {
+    const h = document.createElement('div');
+    h.className = 'h';
+    h.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+    const size = 18 + Math.random() * 30;
+    h.style.fontSize = size + 'px';
+    h.style.left = Math.random() * (window.innerWidth - size) + 'px';
+    h.style.top = Math.random() * (window.innerHeight - size) + 'px';
+    h.style.setProperty('--r', (Math.random() * 50 - 25) + 'deg');
+    document.body.appendChild(h);
+    $('n').textContent = ++i;
+    if (i >= TOTAL){
+      clearInterval(t);
+      setTimeout(() => $('final').classList.remove('hidden'), 500);
+    }
+  }, 30);
+}
+
+$('open').onclick = () => {
+  $('start').classList.add('gone');
+  setTimeout(() => { $('start').classList.add('hidden'); lanzar(); }, 450);
+};
+</script>
+</body>
+</html>
